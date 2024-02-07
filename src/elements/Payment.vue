@@ -81,6 +81,14 @@ export default {
     form () {
       return document.getElementById('stripe-payment-element-form');
     },
+    confirmFunction() {
+      const clientSecret = this.elementsOptions?.clientSecret ?? '';
+
+      if (clientSecret.startsWith('seti_') || clientSecret.startsWith('setu_')) {
+        return 'confirmSetup';
+      }
+      return 'confirmPayment';
+    }
   },
   async mounted () {
     // FIXME: temporarily remove to avoid problems with remote non-production deployments
@@ -130,7 +138,7 @@ export default {
       try {
         this.$emit('loading', true);
         event.preventDefault();
-        const { error, paymentIntent } = await this.stripe.confirmPayment({
+        const { error, paymentIntent } = await this.stripe[this.confirmFunction]({
           elements: this.elements,
           confirmParams: this.confirmParams,
           redirect: this.redirect,
